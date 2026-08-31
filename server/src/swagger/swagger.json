@@ -1,0 +1,141 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "InvoiceFlow API Documentation",
+    "version": "1.0.0",
+    "description": "Enterprise-grade REST API for InvoiceFlow — Smart Invoice & Vendor Payment Management System (MERN Stack)."
+  },
+  "servers": [
+    {
+      "url": "/api",
+      "description": "Main API server"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  },
+  "security": [
+    {
+      "bearerAuth": []
+    }
+  ],
+  "paths": {
+    "/auth/login": {
+      "post": {
+        "summary": "Authenticate user & return JWT",
+        "tags": ["Auth"],
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["email", "password"],
+                "properties": {
+                  "email": { "type": "string", "example": "admin@invoiceflow.io" },
+                  "password": { "type": "string", "example": "Password123!" },
+                  "twoFactorToken": { "type": "string", "example": "123456" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Login successful" },
+          "401": { "description": "Invalid credentials" }
+        }
+      }
+    },
+    "/auth/register": {
+      "post": {
+        "summary": "Register a new user",
+        "tags": ["Auth"],
+        "security": [],
+        "responses": {
+          "201": { "description": "User registered successfully" }
+        }
+      }
+    },
+    "/invoices": {
+      "get": {
+        "summary": "Get filterable list of invoices",
+        "tags": ["Invoices"],
+        "responses": {
+          "200": { "description": "Invoices array with pagination" }
+        }
+      },
+      "post": {
+        "summary": "Create a new invoice with duplicate check and approval tier assignment",
+        "tags": ["Invoices"],
+        "responses": {
+          "201": { "description": "Invoice created" }
+        }
+      }
+    },
+    "/invoices/check-duplicate": {
+      "post": {
+        "summary": "Real-time non-blocking duplicate detection check",
+        "tags": ["Invoices"],
+        "responses": {
+          "200": { "description": "Duplicate check result" }
+        }
+      }
+    },
+    "/invoices/{id}": {
+      "get": {
+        "summary": "Get invoice details, timeline steps, attachments & payments",
+        "tags": ["Invoices"],
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "responses": { "200": { "description": "Invoice detail" } }
+      }
+    },
+    "/approvals/pending": {
+      "get": {
+        "summary": "Get pending invoices awaiting current user's approval",
+        "tags": ["Approvals"],
+        "responses": { "200": { "description": "List of pending approvals" } }
+      }
+    },
+    "/approvals/{id}/approve": {
+      "post": {
+        "summary": "Approve invoice step",
+        "tags": ["Approvals"],
+        "responses": { "200": { "description": "Invoice approved" } }
+      }
+    },
+    "/approvals/{id}/reject": {
+      "post": {
+        "summary": "Reject invoice with required reason",
+        "tags": ["Approvals"],
+        "responses": { "200": { "description": "Invoice rejected" } }
+      }
+    },
+    "/payments": {
+      "get": { "summary": "Get payment transactions", "tags": ["Payments"] },
+      "post": { "summary": "Record a new payment & transition invoice status", "tags": ["Payments"] }
+    },
+    "/vendors": {
+      "get": { "summary": "Get vendors with aggregated metrics", "tags": ["Vendors"] },
+      "post": { "summary": "Create a new vendor", "tags": ["Vendors"] }
+    },
+    "/dashboard/metrics": {
+      "get": { "summary": "Get KPI metrics, charts data, and activity feed", "tags": ["Dashboard"] }
+    },
+    "/reports/data": {
+      "get": { "summary": "Get report aggregations and CSV data", "tags": ["Reports"] }
+    },
+    "/audit-logs": {
+      "get": { "summary": "Get append-only audit trail events", "tags": ["Audit Logs"] }
+    },
+    "/settings": {
+      "get": { "summary": "Get organization thresholds and configs", "tags": ["Settings"] }
+    }
+  }
+}
