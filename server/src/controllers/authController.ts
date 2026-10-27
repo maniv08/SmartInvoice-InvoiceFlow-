@@ -3,7 +3,7 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import speakeasy from 'speakeasy';
 import QRCode from 'qrcode';
-import { User, Organization } from '../models';
+import { User, Organization, Vendor } from '../models';
 import { AuthRequest } from '../middleware/auth';
 import { logAuditEvent } from '../middleware/auditLogger';
 
@@ -23,7 +23,7 @@ const signToken = (user: any): string => {
 };
 
 export const register = async (req: AuthRequest, res: Response): Promise<void> => {
-  const { name, email, password, role, vendorId } = req.body;
+  const { name, email, password, role, vendorId, organizationName, vendorName, gstin } = req.body;
 
   const existingUser = await User.findOne({ email: email.toLowerCase() });
   if (existingUser) {
@@ -31,13 +31,45 @@ export const register = async (req: AuthRequest, res: Response): Promise<void> =
     return;
   }
 
-  // Get or assign default organization
+  // Find or create organization
   let org = await Organization.findOne({});
-  if (!org) {
+  if (role === 'ADMIN' && organizationName) {
+    const code = organizationName.replace(/[^a-zA-Z0-9]/g, '').slice(0, 6).toUpperCase() || 'ORG_01';
     org = await Organization.create({
-      name: 'Acme Enterprises India Pvt Ltd',
-      code: 'ACME_IND',
+      name: organizationName,
+      code,
+      email: email.toLowerCase(),
     });
+  } else if (!org) {
+    org = await Organization.create({
+      name: organizationName || 'DBS World Pvt Ltd',
+      code: 'DBS_WLD',
+    });
+  }
+
+  // Handle vendor creation if VENDOR role and vendorName provided
+  let linkedVendorId = vendorId;
+  if (role === 'VENDOR' && !linkedVendorId && vendorName) {
+    const vCode = 'VEND-' + Math.random().toString(36).substring(2, 7).toUpperCase();
+    const newVendor = await Vendor.create({
+      name: vendorName,
+      code: vCode,
+      category: 'General Supplies & Services',
+      contactPerson: name,
+      email: email.toLowerCase(),
+      phone: '+91 98765 43210',
+      gstin: gstin || '29AABCT1234Z1ZA',
+      bankDetails: {
+        accountName: vendorName,
+        accountNumber: '000000' + Math.floor(100000 + Math.random() * 900000),
+        ifscCode: 'HDFC0001234',
+        bankName: 'HDFC Bank Ltd',
+      },
+      paymentTerms: 'Net 30',
+      status: 'ACTIVE',
+      organization: org._id,
+    });
+    linkedVendorId = newVendor._id;
   }
 
   const hashedPassword = await bcrypt.hash(password, 10);
@@ -48,7 +80,7 @@ export const register = async (req: AuthRequest, res: Response): Promise<void> =
     password: hashedPassword,
     role: role || 'APPROVER',
     organization: org._id,
-    vendor: vendorId || undefined,
+    vendor: linkedVendorId || undefined,
   });
 
   const token = signToken(user);

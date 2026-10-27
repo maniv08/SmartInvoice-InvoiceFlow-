@@ -42,3 +42,6 @@ Thumbs.db
 uploads/
 */uploads/
 !server/uploads/.gitkeep
+
+# Local data & databases
+data/

@@ -21,6 +21,7 @@ import {
   CreditCard,
   Building,
   ShieldCheck,
+  User,
   UserCheck,
   Briefcase,
   LogOut,
@@ -107,7 +108,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           {/* Org Selector Pill */}
           <div className="hidden lg:flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100/90 dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 text-xs font-semibold text-slate-700 dark:text-slate-300 shadow-inner">
             <Building className="h-3.5 w-3.5 text-indigo-500" />
-            <span className="truncate max-w-[130px]">Acme Enterprises</span>
+            <span className="truncate max-w-[130px]">DBS World</span>
           </div>
         </div>
 
@@ -215,6 +216,14 @@ export const Navbar: React.FC<NavbarProps> = ({
               >
                 <Building className="mr-2 h-3.5 w-3.5 text-slate-500" />
                 <span>Organization Profile</span>
+              </DropdownMenuItem>
+
+              <DropdownMenuItem
+                onClick={() => (onOpenProfile ? onOpenProfile() : navigate('/settings'))}
+                className="cursor-pointer text-xs"
+              >
+                <User className="mr-2 h-3.5 w-3.5 text-indigo-500" />
+                <span className="font-medium">My Profile & Photo</span>
               </DropdownMenuItem>
 
               <DropdownMenuItem

@@ -38,8 +38,8 @@ export const App: React.FC = () => {
               <Route path="/settings" element={<SettingsPage />} />
             </Route>
 
-            {/* Catch-all redirect */}
-            <Route path="*" element={<Navigate to="/" replace />} />
+            {/* Catch-all redirect to sign in */}
+            <Route path="*" element={<Navigate to="/login" replace />} />
           </Routes>
         </BrowserRouter>
         <Toaster position="top-right" richColors closeButton />

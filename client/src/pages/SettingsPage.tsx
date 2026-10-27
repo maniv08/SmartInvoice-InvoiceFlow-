@@ -62,8 +62,8 @@ export const SettingsPage: React.FC = () => {
         setTier2Limit(s.approvalThresholds?.tier2Limit || 100000);
         setPreDueDays((s.reminderConfig?.preDueDays || [7, 3, 1]).join(', '));
         setPostDueDays((s.reminderConfig?.postDueDays || [1, 7, 15]).join(', '));
-        setCompanyName(s.companyProfile?.name || 'Acme Enterprises India Pvt Ltd');
-        setCompanyEmail(s.companyProfile?.email || 'finance@acmeindia.com');
+        setCompanyName(s.companyProfile?.name || 'DBS World Pvt Ltd');
+        setCompanyEmail(s.companyProfile?.email || 'contact@dbsworld.com');
         setCompanyPhone(s.companyProfile?.phone || '+91 80 4567 8900');
         setCompanyTaxId(s.companyProfile?.taxId || '29AABCA1234F1Z5');
       }

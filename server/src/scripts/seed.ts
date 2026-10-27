@@ -37,10 +37,10 @@ export const seedDatabase = async () => {
 
   // 2. Create Organization
   const org = await Organization.create({
-    name: 'Acme Enterprises India Pvt Ltd',
-    code: 'ACME_IND',
+    name: 'DBS World Pvt Ltd',
+    code: 'DBS_WLD',
     gstin: '29AABCA1234F1Z5',
-    email: 'contact@acmeindia.com',
+    email: 'contact@dbsworld.com',
     phone: '+91 80 4567 8900',
     address: {
       street: 'Tower 4, Embassy TechVillage, Outer Ring Road',
@@ -347,8 +347,8 @@ export const seedDatabase = async () => {
   const defaultHashedPassword = await bcrypt.hash('Password123!', 10);
   const usersData = [
     {
-      name: 'Arjun Mehta',
-      email: 'admin@invoiceflow.io',
+      name: 'V. Manikandan',
+      email: 'vmanikandan9841@dbsworld.com',
       password: defaultHashedPassword,
       role: 'ADMIN',
       organization: org._id,
@@ -356,8 +356,8 @@ export const seedDatabase = async () => {
       twoFactorEnabled: false,
     },
     {
-      name: 'Priya Sharma',
-      email: 'finance@invoiceflow.io',
+      name: 'Karthik',
+      email: 'offxkarthik07@dbsworld.com',
       password: defaultHashedPassword,
       role: 'FINANCE_MANAGER',
       organization: org._id,
@@ -366,7 +366,7 @@ export const seedDatabase = async () => {
     },
     {
       name: 'Rohan Gupta',
-      email: 'finance2@invoiceflow.io',
+      email: 'finance2@dbsworld.com',
       password: defaultHashedPassword,
       role: 'FINANCE_MANAGER',
       organization: org._id,
@@ -374,8 +374,8 @@ export const seedDatabase = async () => {
       twoFactorEnabled: false,
     },
     {
-      name: 'Vikram Joshi',
-      email: 'approver@invoiceflow.io',
+      name: 'V. Manikandan',
+      email: 'vmanikandan7200@dbsworld.com',
       password: defaultHashedPassword,
       role: 'APPROVER',
       organization: org._id,
@@ -384,7 +384,7 @@ export const seedDatabase = async () => {
     },
     {
       name: 'Ananya Deshmukh',
-      email: 'ananya.deshmukh@invoiceflow.io',
+      email: 'ananya.deshmukh@dbsworld.com',
       password: defaultHashedPassword,
       role: 'APPROVER',
       organization: org._id,
@@ -393,7 +393,7 @@ export const seedDatabase = async () => {
     },
     {
       name: 'Rahul Verma',
-      email: 'rahul.verma@invoiceflow.io',
+      email: 'rahul.verma@dbsworld.com',
       password: defaultHashedPassword,
       role: 'APPROVER',
       organization: org._id,
@@ -402,7 +402,7 @@ export const seedDatabase = async () => {
     },
     {
       name: 'Deepak Nair',
-      email: 'deepak.nair@invoiceflow.io',
+      email: 'deepak.nair@dbsworld.com',
       password: defaultHashedPassword,
       role: 'APPROVER',
       organization: org._id,
@@ -410,8 +410,8 @@ export const seedDatabase = async () => {
       twoFactorEnabled: false,
     },
     {
-      name: 'Rajesh Gopinathan (Tata)',
-      email: 'vendor@tata.com',
+      name: 'Kishore',
+      email: 'kishore983@dbsworld.com',
       password: defaultHashedPassword,
       role: 'VENDOR',
       organization: org._id,
@@ -454,11 +454,11 @@ export const seedDatabase = async () => {
   const createdUsers = await User.insertMany(usersData);
   console.log(`👥 Created ${createdUsers.length} Users with roles ADMIN, FINANCE_MANAGER, APPROVER, VENDOR.`);
 
-  const adminUser = createdUsers.find((u) => u.role === 'ADMIN')!;
-  const financeUser = createdUsers.find((u) => u.role === 'FINANCE_MANAGER')!;
-  const approver1 = createdUsers.find((u) => u.email === 'approver@invoiceflow.io')!;
-  const approver2 = createdUsers.find((u) => u.email === 'ananya.deshmukh@invoiceflow.io')!;
-  const approver3 = createdUsers.find((u) => u.email === 'rahul.verma@invoiceflow.io')!;
+  const adminUser = createdUsers.find((u) => u.email === 'vmanikandan9841@dbsworld.com') || createdUsers.find((u) => u.role === 'ADMIN')!;
+  const financeUser = createdUsers.find((u) => u.email === 'offxkarthik07@dbsworld.com') || createdUsers.find((u) => u.role === 'FINANCE_MANAGER')!;
+  const approver1 = createdUsers.find((u) => u.email === 'vmanikandan7200@dbsworld.com') || createdUsers.find((u) => u.role === 'APPROVER')!;
+  const approver2 = createdUsers.find((u) => u.email === 'ananya.deshmukh@dbsworld.com') || createdUsers.filter((u) => u.role === 'APPROVER')[1] || approver1;
+  const approver3 = createdUsers.find((u) => u.email === 'rahul.verma@dbsworld.com') || approver1;
 
   // 5. Create System Settings
   const settings = await Setting.create({
@@ -475,11 +475,11 @@ export const seedDatabase = async () => {
       escalationRole: 'FINANCE_MANAGER',
     },
     companyProfile: {
-      name: 'Acme Enterprises India Pvt Ltd',
-      email: 'finance@acmeindia.com',
+      name: 'DBS World Pvt Ltd',
+      email: 'contact@dbsworld.com',
       phone: '+91 80 4567 8900',
       taxId: '29AABCA1234F1Z5',
-      website: 'https://acmeindia.com',
+      website: 'https://dbsworld.com',
     },
   });
   console.log('⚙️ Created Organization Settings & Approval Thresholds.');
@@ -1013,10 +1013,10 @@ export const seedDatabase = async () => {
   console.log('\n🎉 Database seeding completed successfully!');
   console.log('--------------------------------------------------');
   console.log('Demo Credentials:');
-  console.log('• Admin:           admin@invoiceflow.io     / Password123!');
-  console.log('• Finance Manager: finance@invoiceflow.io   / Password123!');
-  console.log('• Approver:        approver@invoiceflow.io  / Password123!');
-  console.log('• Vendor:          vendor@tata.com          / Password123!');
+  console.log('• Admin:           vmanikandan9841@dbsworld.com  / Password123!');
+  console.log('• Finance Manager: offxkarthik07@dbsworld.com    / Password123!');
+  console.log('• Approver:        vmanikandan7200@dbsworld.com  / Password123!');
+  console.log('• Vendor:          kishore983@dbsworld.com       / Password123!');
   console.log('--------------------------------------------------\n');
 };
 

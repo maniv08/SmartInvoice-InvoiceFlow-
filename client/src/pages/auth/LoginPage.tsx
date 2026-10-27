@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -20,13 +20,125 @@ import {
   Building,
   KeyRound,
   Fingerprint,
+  ShieldAlert,
+  Wallet,
+  CheckCheck,
+  Store,
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { UserRole } from '@/lib/types';
+import { cn } from '@/lib/utils';
+
+interface RoleConfig {
+  id: UserRole;
+  label: string;
+  badge: string;
+  icon: React.ElementType;
+  headline: string;
+  description: string;
+  defaultEmail: string;
+  colorClass: string;
+  borderClass: string;
+  activeBgClass: string;
+  iconColor: string;
+  features: string[];
+}
+
+const ROLE_CONFIGS: Record<UserRole, RoleConfig> = {
+  ADMIN: {
+    id: 'ADMIN',
+    label: 'Admin',
+    badge: 'Enterprise Governance',
+    icon: ShieldAlert,
+    headline: 'Administrator & System Governance Portal',
+    description: 'Configure corporate security policies, manage multi-org settings, manage users, and inspect immutable audit trails.',
+    defaultEmail: 'vmanikandan9841@dbsworld.com',
+    colorClass: 'text-purple-600 dark:text-purple-400',
+    borderClass: 'border-purple-500/30',
+    activeBgClass: 'bg-purple-500/10 text-purple-600 dark:text-purple-300 border-purple-500/40',
+    iconColor: 'text-purple-500',
+    features: [
+      'Comprehensive System & Security Configuration',
+      'Multi-Tier Approval Policy & Delegation Matrix',
+      'Statutory Compliance & Immutable Audit Trails',
+      'User Management & Role Permissions Enforcement',
+    ],
+  },
+  FINANCE_MANAGER: {
+    id: 'FINANCE_MANAGER',
+    label: 'Finance',
+    badge: 'Treasury & AP Ops',
+    icon: Wallet,
+    headline: 'Finance & Treasury Management Console',
+    description: 'Disburse scheduled vendor payments, reconcile bank UTRs, execute 3-way matching, and generate financial reports.',
+    defaultEmail: 'offxkarthik07@dbsworld.com',
+    colorClass: 'text-emerald-600 dark:text-emerald-400',
+    borderClass: 'border-emerald-500/30',
+    activeBgClass: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-300 border-emerald-500/40',
+    iconColor: 'text-emerald-500',
+    features: [
+      'Automated 3-Way Reconciliation (Invoice vs PO vs GRN)',
+      'Direct Bank UTR & Real-Time NEFT/RTGS Remittances',
+      'Statutory Indian GST Breakdown & Tax Credit Ledger',
+      'Dynamic Cashflow Projections & Batch Payouts',
+    ],
+  },
+  APPROVER: {
+    id: 'APPROVER',
+    label: 'Approver',
+    badge: 'Multi-Level Review',
+    icon: CheckCheck,
+    headline: 'Executive & Departmental Approval Portal',
+    description: 'Review invoice line items, verify contract threshold limits, authorize disbursements, or request purchase clarifications.',
+    defaultEmail: 'vmanikandan7200@dbsworld.com',
+    colorClass: 'text-amber-600 dark:text-amber-400',
+    borderClass: 'border-amber-500/30',
+    activeBgClass: 'bg-amber-500/10 text-amber-600 dark:text-amber-300 border-amber-500/40',
+    iconColor: 'text-amber-500',
+    features: [
+      'One-Click Tiered Authorization & Delegation Rules',
+      'Interactive Line-Item Discrepancy & PO Comparison',
+      'Expedited Mobile-Responsive Decision Workflows',
+      'Contextual Comments & Departmental Budget Checks',
+    ],
+  },
+  VENDOR: {
+    id: 'VENDOR',
+    label: 'Vendor',
+    badge: 'Supplier Self-Service',
+    icon: Store,
+    headline: 'Supplier Self-Service & Invoicing Portal',
+    description: 'Submit electronic tax invoices, monitor real-time approval status, and track scheduled payment remittances directly.',
+    defaultEmail: 'kishore983@dbsworld.com',
+    colorClass: 'text-blue-600 dark:text-blue-400',
+    borderClass: 'border-blue-500/30',
+    activeBgClass: 'bg-blue-500/10 text-blue-600 dark:text-blue-300 border-blue-500/40',
+    iconColor: 'text-blue-500',
+    features: [
+      'Instant OCR Invoice Ingestion & PDF Uploading',
+      'Transparent Multi-Tier Verification Lifecycle',
+      'Disbursement Advice & Downloadable Bank UTR Slips',
+      'Direct Dispute Resolution & Query Messaging',
+    ],
+  },
+};
 
 export const LoginPage: React.FC = () => {
   const { login } = useAuth();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
 
+  // Determine initial role from query parameter (e.g. /login?role=vendor)
+  const roleParam = searchParams.get('role')?.toUpperCase();
+  const validRole: UserRole =
+    roleParam === 'ADMIN' ||
+    roleParam === 'FINANCE_MANAGER' ||
+    roleParam === 'APPROVER' ||
+    roleParam === 'VENDOR'
+      ? (roleParam as UserRole)
+      : 'ADMIN';
+
+  const [selectedRole, setSelectedRole] = useState<UserRole>(validRole);
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [rememberMe, setRememberMe] = useState<boolean>(true);
@@ -41,10 +153,27 @@ export const LoginPage: React.FC = () => {
   const [isForgotPasswordOpen, setIsForgotPasswordOpen] = useState<boolean>(false);
   const [resetEmail, setResetEmail] = useState<string>('');
 
+  const currentRoleConfig = ROLE_CONFIGS[selectedRole];
+
+  // Update query param when role tab changes
+  const handleRoleSelect = (role: UserRole) => {
+    setSelectedRole(role);
+    setSearchParams({ role: role.toLowerCase() }, { replace: true });
+  };
+
+  // Sync if URL query param changes externally
+  useEffect(() => {
+    if (roleParam && (roleParam === 'ADMIN' || roleParam === 'FINANCE_MANAGER' || roleParam === 'APPROVER' || roleParam === 'VENDOR')) {
+      setSelectedRole(roleParam as UserRole);
+    }
+  }, [roleParam]);
+
+
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !password) {
-      toast.error('Please enter both your corporate email and password.');
+      toast.error('Please enter your email and password.');
       return;
     }
 
@@ -55,11 +184,11 @@ export const LoginPage: React.FC = () => {
         setIs2FAModalOpen(true);
         toast.info('Two-Factor Authentication is active on your account. Please enter your 6-digit TOTP code.');
       } else {
-        toast.success('Signed in successfully.');
+        toast.success(`Signed in to ${currentRoleConfig.label} workspace successfully.`);
         navigate('/');
       }
     } catch (err: any) {
-      toast.error(err.response?.data?.message || 'Invalid email or password. Please check your credentials.');
+      toast.error(err.response?.data?.message || 'Invalid email or password. Please verify credentials.');
     } finally {
       setLoading(false);
     }
@@ -84,8 +213,8 @@ export const LoginPage: React.FC = () => {
     setSsoLoading(true);
     setTimeout(async () => {
       try {
-        await login('admin@invoiceflow.io', 'Password123!');
-        toast.success('Corporate Single Sign-On (SSO) verified via SAML 2.0.');
+        await login(currentRoleConfig.defaultEmail, 'Password123!');
+        toast.success(`Corporate SSO verified for ${currentRoleConfig.label} role.`);
         navigate('/');
       } catch {
         toast.error('SSO verification failed.');
@@ -126,22 +255,23 @@ export const LoginPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Feature Highlights */}
-        <div className="space-y-6 max-w-md relative z-10">
+        {/* Dynamic Role-Specific Feature Highlights */}
+        <div className="space-y-6 max-w-md relative z-10 transition-all duration-300">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium bg-indigo-500/10 border border-indigo-500/30 text-indigo-300">
+            <currentRoleConfig.icon className="h-3.5 w-3.5" />
+            <span>{currentRoleConfig.badge}</span>
+          </div>
+
           <h2 className="text-3xl font-extrabold tracking-tight leading-tight">
-            Next-Generation Accounts Payable & Supplier Remittance Infrastructure
+            {currentRoleConfig.headline}
           </h2>
+
           <p className="text-sm text-slate-400 leading-relaxed">
-            Eliminate disbursement discrepancies with deterministic 3-way matching, automated Indian GST statutory validation, and real-time duplicate fraud protection.
+            {currentRoleConfig.description}
           </p>
 
           <div className="space-y-3.5 pt-2">
-            {[
-              '98–99% Precision Multi-Pass OCR & Line-Item Extraction',
-              'Deterministic 3-Way Reconciliation (Invoice vs PO vs GRN)',
-              'Indian GST Breakdown, Multi-Payment Ledgers & Bank UTRs',
-              'Dynamic Multi-Tier Approval Matrix & Statutory Audit Trails',
-            ].map((feat, i) => (
+            {currentRoleConfig.features.map((feat, i) => (
               <div key={i} className="flex items-center gap-3 text-xs text-slate-300">
                 <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" aria-hidden="true" />
                 <span>{feat}</span>
@@ -167,8 +297,8 @@ export const LoginPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Right Column: Secure Production Sign-In Form */}
-      <div className="flex-1 flex flex-col justify-center p-6 sm:p-12 lg:p-16 max-w-lg mx-auto w-full">
+      {/* Right Column: Secure Production Sign-In Form with Role Selector */}
+      <div className="flex-1 flex flex-col justify-center p-6 sm:p-12 lg:p-16 max-w-xl mx-auto w-full">
         <div className="space-y-6">
           <div className="space-y-1">
             <h1 className="text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white">
@@ -177,6 +307,42 @@ export const LoginPage: React.FC = () => {
             <p className="text-xs text-slate-500 dark:text-slate-400">
               Access your corporate account via Single Sign-On or verified email credentials.
             </p>
+          </div>
+
+          {/* Role-Based Access Selector Tabs */}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <Label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                Select Your Role Portal
+              </Label>
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 p-1.5 bg-slate-100 dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800">
+              {(Object.keys(ROLE_CONFIGS) as UserRole[]).map((roleKey) => {
+                const config = ROLE_CONFIGS[roleKey];
+                const isSelected = selectedRole === roleKey;
+                const IconComponent = config.icon;
+
+                return (
+                  <button
+                    key={roleKey}
+                    type="button"
+                    onClick={() => handleRoleSelect(roleKey)}
+                    className={cn(
+                      'flex flex-col items-center justify-center p-2.5 rounded-xl text-center transition-all duration-200',
+                      isSelected
+                        ? 'bg-white dark:bg-slate-800 shadow-sm border font-bold ' + config.colorClass + ' ' + config.borderClass
+                        : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-white/50 dark:hover:bg-slate-800/50'
+                    )}
+                  >
+                    <IconComponent
+                      className={cn('h-4 w-4 mb-1 transition-transform', isSelected ? 'scale-110 ' + config.iconColor : '')}
+                    />
+                    <span className="text-xs">{config.label}</span>
+                  </button>
+                );
+              })}
+            </div>
           </div>
 
           {/* Enterprise Single Sign-On (SSO) Button */}
@@ -192,10 +358,10 @@ export const LoginPage: React.FC = () => {
             ) : (
               <Fingerprint className="h-4 w-4 text-indigo-600" />
             )}
-            <span>Continue with Corporate SSO / SAML</span>
+            <span>Continue with Corporate SSO ({currentRoleConfig.label})</span>
           </Button>
 
-          <div className="relative flex py-2 items-center">
+          <div className="relative flex py-1 items-center">
             <div className="flex-grow border-t border-slate-200 dark:border-slate-800" />
             <span className="flex-shrink mx-4 text-xs font-medium text-slate-400 dark:text-slate-500 uppercase tracking-wider text-[10px]">
               Or sign in with email credentials
@@ -272,7 +438,7 @@ export const LoginPage: React.FC = () => {
                 </>
               ) : (
                 <>
-                  <span>Sign In to Dashboard</span>
+                  <span>Sign In as {currentRoleConfig.label}</span>
                   <ArrowRight className="h-4 w-4" aria-hidden="true" />
                 </>
               )}
@@ -281,10 +447,38 @@ export const LoginPage: React.FC = () => {
 
           <div className="pt-4 border-t border-slate-100 dark:border-slate-800/80 text-center">
             <p className="text-xs text-slate-500">
-              Need an organization workspace account?{' '}
-              <Link to="/register" className="font-semibold text-indigo-600 dark:text-indigo-400 hover:underline">
-                Register Organization
-              </Link>
+              {selectedRole === 'ADMIN' && (
+                <>
+                  Need an organization workspace account?{' '}
+                  <Link to="/register?role=admin" className="font-semibold text-indigo-600 dark:text-indigo-400 hover:underline">
+                    Register Organization
+                  </Link>
+                </>
+              )}
+              {selectedRole === 'FINANCE_MANAGER' && (
+                <>
+                  Need a finance department account?{' '}
+                  <Link to="/register?role=finance_manager" className="font-semibold text-emerald-600 dark:text-emerald-400 hover:underline">
+                    Register Finance Account
+                  </Link>
+                </>
+              )}
+              {selectedRole === 'APPROVER' && (
+                <>
+                  Need an approver or reviewer account?{' '}
+                  <Link to="/register?role=approver" className="font-semibold text-amber-600 dark:text-amber-400 hover:underline">
+                    Register Approver Account
+                  </Link>
+                </>
+              )}
+              {selectedRole === 'VENDOR' && (
+                <>
+                  Are you a supplier or external vendor?{' '}
+                  <Link to="/register?role=vendor" className="font-semibold text-blue-600 dark:text-blue-400 hover:underline">
+                    Register Vendor Account
+                  </Link>
+                </>
+              )}
             </p>
           </div>
         </div>

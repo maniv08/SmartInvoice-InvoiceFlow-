@@ -170,19 +170,19 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
         <CommandGroup heading="🎭 Switch Demo Role">
           <CommandItem onSelect={() => runCommand(() => switchDemoRole('ADMIN'))}>
             <Sparkles className="mr-2 h-4 w-4 text-purple-500" />
-            <span>Switch to Admin (Arjun Mehta)</span>
+            <span>Switch to Admin (V. Manikandan)</span>
           </CommandItem>
           <CommandItem onSelect={() => runCommand(() => switchDemoRole('FINANCE_MANAGER'))}>
             <Sparkles className="mr-2 h-4 w-4 text-emerald-500" />
-            <span>Switch to Finance Manager (Priya Sharma)</span>
+            <span>Switch to Finance Manager (Karthik)</span>
           </CommandItem>
           <CommandItem onSelect={() => runCommand(() => switchDemoRole('APPROVER'))}>
             <Sparkles className="mr-2 h-4 w-4 text-amber-500" />
-            <span>Switch to Approver (Vikram Joshi)</span>
+            <span>Switch to Approver (V. Manikandan)</span>
           </CommandItem>
           <CommandItem onSelect={() => runCommand(() => switchDemoRole('VENDOR'))}>
             <Sparkles className="mr-2 h-4 w-4 text-blue-500" />
-            <span>Switch to Vendor (Tata Services)</span>
+            <span>Switch to Vendor (Kishore)</span>
           </CommandItem>
         </CommandGroup>
 

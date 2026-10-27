@@ -108,10 +108,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Demo Switcher for fast evaluation across roles
   const switchDemoRole = async (role: UserRole) => {
     const roleEmailMap: Record<UserRole, string> = {
-      ADMIN: 'admin@invoiceflow.io',
-      FINANCE_MANAGER: 'finance@invoiceflow.io',
-      APPROVER: 'approver@invoiceflow.io',
-      VENDOR: 'vendor@tata.com',
+      ADMIN: 'vmanikandan9841@dbsworld.com',
+      FINANCE_MANAGER: 'offxkarthik07@dbsworld.com',
+      APPROVER: 'vmanikandan7200@dbsworld.com',
+      VENDOR: 'kishore983@dbsworld.com',
     };
 
     const targetEmail = roleEmailMap[role];

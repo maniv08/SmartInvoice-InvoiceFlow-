@@ -38,29 +38,27 @@ export const InvoiceFormModal: React.FC<InvoiceFormModalProps> = ({
   const [vendors, setVendors] = useState<Vendor[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
 
-  // Form State
+  // Form State - start completely clean & clear
   const [invoiceNumber, setInvoiceNumber] = useState<string>('');
   const [vendorId, setVendorId] = useState<string>('');
   const [poNumber, setPoNumber] = useState<string>('');
   const [description, setDescription] = useState<string>('');
-  const [issueDate, setIssueDate] = useState<string>(new Date().toISOString().split('T')[0]);
-  const [dueDate, setDueDate] = useState<string>(
-    new Date(Date.now() + 30 * 86400000).toISOString().split('T')[0]
-  );
-  const [paymentTerms, setPaymentTerms] = useState<string>('Net 30');
+  const [issueDate, setIssueDate] = useState<string>('');
+  const [dueDate, setDueDate] = useState<string>('');
+  const [paymentTerms, setPaymentTerms] = useState<string>('');
   const [discountAmount, setDiscountAmount] = useState<number>(0);
   const [notes, setNotes] = useState<string>('');
   const [status, setStatus] = useState<string>('SUBMITTED');
 
-  // Dynamic Line Items
+  // Dynamic Line Items - default blank
   const [items, setItems] = useState<InvoiceItem[]>([
     {
-      description: 'Professional Enterprise Software & Cloud Consulting',
-      quantity: 1,
-      unitPrice: 25000,
-      taxRate: 18,
-      taxAmount: 4500,
-      amount: 29500,
+      description: '',
+      quantity: '' as any,
+      unitPrice: '' as any,
+      taxRate: '' as any,
+      taxAmount: 0,
+      amount: 0,
     },
   ]);
 
@@ -83,8 +81,6 @@ export const InvoiceFormModal: React.FC<InvoiceFormModalProps> = ({
           setVendorId(autoSelectId);
         } else if (isVendor && user?.vendor) {
           setVendorId(user.vendor._id || (user.vendor as any));
-        } else if (res.data.vendors.length > 0 && !vendorId) {
-          setVendorId(res.data.vendors[0]._id);
         }
       }
     } catch (err) {
@@ -109,13 +105,33 @@ export const InvoiceFormModal: React.FC<InvoiceFormModalProps> = ({
         setNotes(invoiceToEdit.notes || '');
         setStatus(invoiceToEdit.status);
         setItems(invoiceToEdit.items || []);
+        setSelectedFile(null);
       } else {
-        // Reset for new invoice
-        setInvoiceNumber(`INV-2026-${Math.floor(1000 + Math.random() * 9000)}`);
-        setPoNumber(`PO-2026-${Math.floor(8000 + Math.random() * 2000)}`);
+        // Reset all fields clean & clear for new invoice
+        setInvoiceNumber('');
+        if (!isVendor) {
+          setVendorId('');
+        }
+        setPoNumber('');
+        setDescription('');
+        setIssueDate('');
+        setDueDate('');
+        setPaymentTerms('');
         setDiscountAmount(0);
         setNotes('');
         setStatus('SUBMITTED');
+        setSelectedFile(null);
+        setDuplicateCheck(null);
+        setItems([
+          {
+            description: '',
+            quantity: '' as any,
+            unitPrice: '' as any,
+            taxRate: '' as any,
+            taxAmount: 0,
+            amount: 0,
+          },
+        ]);
       }
     }
   }, [open, invoiceToEdit]);
@@ -182,11 +198,11 @@ export const InvoiceFormModal: React.FC<InvoiceFormModalProps> = ({
       ...prev,
       {
         description: '',
-        quantity: 1,
-        unitPrice: 5000,
-        taxRate: 18,
-        taxAmount: 900,
-        amount: 5900,
+        quantity: '' as any,
+        unitPrice: '' as any,
+        taxRate: '' as any,
+        taxAmount: 0,
+        amount: 0,
       },
     ]);
   };
@@ -382,7 +398,7 @@ export const InvoiceFormModal: React.FC<InvoiceFormModalProps> = ({
               <Label className="text-xs font-semibold">Payment Terms</Label>
               <Select value={paymentTerms} onValueChange={setPaymentTerms}>
                 <SelectTrigger className="text-xs">
-                  <SelectValue />
+                  <SelectValue placeholder="Select terms (e.g. Net 30)" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="Immediate">Immediate / Upon Receipt</SelectItem>
@@ -448,8 +464,9 @@ export const InvoiceFormModal: React.FC<InvoiceFormModalProps> = ({
                     <Input
                       type="number"
                       min="1"
-                      value={item.quantity}
-                      onChange={(e) => handleItemChange(idx, 'quantity', Number(e.target.value))}
+                      placeholder="Qty"
+                      value={(item.quantity as any) === '' || item.quantity === undefined || item.quantity === null ? '' : item.quantity}
+                      onChange={(e) => handleItemChange(idx, 'quantity', e.target.value === '' ? '' : Number(e.target.value))}
                       className="h-8 text-xs text-center"
                       required
                     />
@@ -458,25 +475,26 @@ export const InvoiceFormModal: React.FC<InvoiceFormModalProps> = ({
                     <Input
                       type="number"
                       min="0"
-                      step="100"
-                      value={item.unitPrice}
-                      onChange={(e) => handleItemChange(idx, 'unitPrice', Number(e.target.value))}
+                      step="any"
+                      placeholder="Price"
+                      value={(item.unitPrice as any) === '' || item.unitPrice === undefined || item.unitPrice === null ? '' : item.unitPrice}
+                      onChange={(e) => handleItemChange(idx, 'unitPrice', e.target.value === '' ? '' : Number(e.target.value))}
                       className="h-8 text-xs text-right tabular-nums font-mono"
                       required
                     />
                   </div>
                   <div className="col-span-1">
-                    <select
-                      value={item.taxRate}
-                      onChange={(e) => handleItemChange(idx, 'taxRate', Number(e.target.value))}
-                      className="h-8 w-full rounded-md border border-slate-200 bg-white dark:bg-slate-900 text-xs px-1 text-center font-mono"
-                    >
-                      <option value="0">0%</option>
-                      <option value="5">5%</option>
-                      <option value="12">12%</option>
-                      <option value="18">18%</option>
-                      <option value="28">28%</option>
-                    </select>
+                    <Input
+                      type="number"
+                      min="0"
+                      max="100"
+                      step="any"
+                      placeholder="GST %"
+                      value={(item.taxRate as any) === '' || item.taxRate === undefined || item.taxRate === null ? '' : item.taxRate}
+                      onChange={(e) => handleItemChange(idx, 'taxRate', e.target.value === '' ? '' : Number(e.target.value))}
+                      className="h-8 text-xs text-center font-mono px-1"
+                      title="Enter GST % (e.g. 0, 5, 12, 18, 28)"
+                    />
                   </div>
                   <div className="col-span-2 flex items-center justify-end gap-2">
                     <span className="font-bold text-slate-900 dark:text-slate-100 tabular-nums text-xs">
@@ -516,8 +534,9 @@ export const InvoiceFormModal: React.FC<InvoiceFormModalProps> = ({
               <Input
                 type="number"
                 min="0"
-                value={discountAmount}
-                onChange={(e) => setDiscountAmount(Number(e.target.value) || 0)}
+                placeholder="0"
+                value={discountAmount === 0 ? '' : discountAmount}
+                onChange={(e) => setDiscountAmount(e.target.value === '' ? 0 : Number(e.target.value))}
                 className="h-7 w-28 text-right font-mono text-xs"
               />
             </div>

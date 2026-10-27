@@ -6,6 +6,10 @@ export const registerSchema = z.object({
   password: z.string().min(6, 'Password must be at least 6 characters'),
   role: z.enum(['ADMIN', 'FINANCE_MANAGER', 'APPROVER', 'VENDOR']).optional().default('APPROVER'),
   vendorId: z.string().optional(),
+  organizationName: z.string().optional(),
+  vendorName: z.string().optional(),
+  gstin: z.string().optional(),
+  department: z.string().optional(),
 });
 
 export const loginSchema = z.object({
@@ -25,5 +29,5 @@ export const changePasswordSchema = z.object({
 
 export const updateProfileSchema = z.object({
   name: z.string().min(2).optional(),
-  avatar: z.string().url().optional().or(z.literal('')),
+  avatar: z.string().optional(),
 });

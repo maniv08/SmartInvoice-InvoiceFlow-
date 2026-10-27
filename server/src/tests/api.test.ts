@@ -23,25 +23,25 @@ describe('InvoiceFlow Comprehensive API & Workflow Test Suite', () => {
     // Authenticate Admin
     const adminRes = await request(app)
       .post('/api/auth/login')
-      .send({ email: 'admin@invoiceflow.io', password: 'Password123!' });
+      .send({ email: 'vmanikandan9841@dbsworld.com', password: 'Password123!' });
     adminToken = adminRes.body.token;
 
     // Authenticate Finance Manager
     const finRes = await request(app)
       .post('/api/auth/login')
-      .send({ email: 'finance@invoiceflow.io', password: 'Password123!' });
+      .send({ email: 'offxkarthik07@dbsworld.com', password: 'Password123!' });
     financeToken = finRes.body.token;
 
     // Authenticate Approver
     const appRes = await request(app)
       .post('/api/auth/login')
-      .send({ email: 'approver@invoiceflow.io', password: 'Password123!' });
+      .send({ email: 'vmanikandan7200@dbsworld.com', password: 'Password123!' });
     approverToken = appRes.body.token;
 
     // Authenticate Vendor
     const vendRes = await request(app)
       .post('/api/auth/login')
-      .send({ email: 'vendor@tata.com', password: 'Password123!' });
+      .send({ email: 'kishore983@dbsworld.com', password: 'Password123!' });
     vendorToken = vendRes.body.token;
 
     testVendor = await Vendor.findOne({ name: { $regex: /Tata/i } });
