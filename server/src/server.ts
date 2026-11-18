@@ -1,4 +1,5 @@
 import dotenv from 'dotenv';
+import mongoose from 'mongoose';
 import app from './app';
 import { connectDB } from './config/db';
 import { initPostgres } from './config/postgres';
@@ -26,11 +27,15 @@ const startServer = async () => {
     // 4. Email notification transporter
     await initEmailTransporter();
 
-    // Check if database is empty, auto-seed with rich demo dataset
-    const userCount = await User.countDocuments({});
-    if (userCount === 0) {
-      console.log('📦 Database appears empty. Running automatic seed...');
-      await seedDatabase();
+    // Check if database is connected and empty, auto-seed with rich demo dataset
+    if (mongoose.connection.readyState === 1) {
+      const userCount = await User.countDocuments({});
+      if (userCount === 0) {
+        console.log('📦 Database appears empty. Running automatic seed...');
+        await seedDatabase();
+      }
+    } else {
+      console.warn('⚠️ Database not connected yet. Waiting for MONGODB_URI to seed data.');
     }
 
     // Start automated scheduler

@@ -23,8 +23,8 @@ export const connectDB = async (): Promise<void> => {
       await mongoose.connect(memoryUri);
       console.log(`✅ Connected to embedded MongoDB Memory Server at: ${memoryUri}`);
     } catch (memErr) {
-      console.error('❌ Failed to connect to MongoDB and failed to start in-memory fallback:', memErr);
-      process.exit(1);
+      console.warn('⚠️ Could not connect to external MongoDB and embedded memory server failed:', memErr);
+      console.warn('💡 Tip: Set MONGODB_URI in your environment variables (e.g. from MongoDB Atlas) for persistent storage.');
     }
   }
 };
